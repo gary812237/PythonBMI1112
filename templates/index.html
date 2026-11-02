@@ -33,7 +33,7 @@
                 <span class="card-icon" aria-hidden="true">↗</span>
               </div>
 
-              <form method="post" action="{{ url_for('index') }}" novalidate>
+              <form method="post" action="{{ url_for('index') }}" novalidate data-guidance='{{ guidance_data|tojson }}'>
                 <div class="form-fields">
                   <div class="field">
                     <label for="height">身高 <span>HEIGHT</span></label>
@@ -58,27 +58,39 @@
           </div>
 
           <div class="hero-side">
-            {% if result %}
-              <section class="result-panel {{ result.tone }}" aria-labelledby="result-title" aria-live="polite">
-                <span class="panel-kicker">YOUR RESULT / 計算結果</span>
-                <div class="result-main">
-                  <span class="result-number">{{ result.bmi }}</span>
-                  <span class="result-unit">BMI</span>
-                </div>
-                <div class="result-divider"></div>
-                <span class="result-label">你的體位屬於 <strong>{{ result.label }}</strong></span>
-                <h2 id="result-title">給你的健康建議</h2>
-                <p>{{ result.advice }}</p>
-                <span class="result-decoration" aria-hidden="true">✳</span>
-              </section>
-            {% else %}
-              <div class="illustration" aria-hidden="true">
-                <span class="illustration-ring ring-one"></span>
-                <span class="illustration-ring ring-two"></span>
-                <span class="illustration-center">身體的每一步<br>都值得好好照顧<span>✳</span></span>
+            <section class="result-panel {{ result.tone if result else 'healthy' }}" id="result-panel" aria-labelledby="result-title" aria-live="polite" {% if not result %}hidden{% endif %}>
+              <span class="panel-kicker">YOUR RESULT / 計算結果</span>
+              <div class="result-main">
+                <span class="result-number" id="result-number">{{ result.bmi if result else "—" }}</span>
+                <span class="result-unit">BMI</span>
               </div>
-              <div class="side-caption"><span class="caption-line"></span> SMALL STEPS, BETTER DAYS.</div>
-            {% endif %}
+              <div class="bmi-gauge" id="bmi-gauge" role="img" aria-label="BMI 儀表板，範圍從 10 到 40">
+                <div class="gauge-arc">
+                  <div class="gauge-track"></div>
+                </div>
+                <div class="gauge-needle" id="gauge-needle" aria-hidden="true" {% if result %}style="--needle-angle: {{ result.gauge_angle }}"{% endif %}></div>
+                <span class="gauge-center" aria-hidden="true"></span>
+                <span class="gauge-min" aria-hidden="true">10</span>
+                <span class="gauge-max" aria-hidden="true">40+</span>
+              </div>
+              <div class="gauge-legend" aria-label="BMI 分級">
+                <span><i class="range-dot low-dot"></i>過輕</span>
+                <span><i class="range-dot healthy-dot"></i>正常</span>
+                <span><i class="range-dot high-dot"></i>過重</span>
+                <span><i class="range-dot obese-dot"></i>肥胖</span>
+              </div>
+              <div class="result-divider"></div>
+              <span class="result-label">你的體位屬於 <strong id="result-label">{{ result.label if result else "—" }}</strong></span>
+              <h2 id="result-title">給你的健康建議</h2>
+              <p id="result-advice">{{ result.advice if result else "" }}</p>
+              <span class="result-decoration" aria-hidden="true">✳</span>
+            </section>
+            <div class="illustration" id="illustration" aria-hidden="true" {% if result %}hidden{% endif %}>
+              <span class="illustration-ring ring-one"></span>
+              <span class="illustration-ring ring-two"></span>
+              <span class="illustration-center">身體的每一步<br>都值得好好照顧<span>✳</span></span>
+            </div>
+            <div class="side-caption" id="side-caption" {% if result %}hidden{% endif %}><span class="caption-line"></span> SMALL STEPS, BETTER DAYS.</div>
           </div>
         </section>
 
@@ -100,5 +112,6 @@
       </main>
       <footer>© 好好生活 <span>TAKE CARE, EVERY DAY.</span></footer>
     </div>
+    <script src="{{ url_for('static', filename='bmi.js') }}" defer></script>
   </body>
 </html>

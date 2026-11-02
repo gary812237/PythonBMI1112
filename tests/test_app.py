@@ -1,6 +1,6 @@
 import unittest
 
-from app import app, bmi_guidance
+from app import app, bmi_gauge_angle, bmi_guidance
 
 
 class BmiAppTests(unittest.TestCase):
@@ -20,6 +20,15 @@ class BmiAppTests(unittest.TestCase):
         self.assertIn("22.5", page)
         self.assertIn("健康體位", page)
         self.assertIn("維持均衡飲食", page)
+        self.assertIn('style="--needle-angle: -15.0deg"', page)
+        self.assertIn('class="gauge-needle"', page)
+
+    def test_gauge_angle_is_clamped_to_display_range(self):
+        self.assertEqual(bmi_gauge_angle(10), -90)
+        self.assertEqual(bmi_gauge_angle(25), 0)
+        self.assertEqual(bmi_gauge_angle(40), 90)
+        self.assertEqual(bmi_gauge_angle(5), -90)
+        self.assertEqual(bmi_gauge_angle(45), 90)
 
     def test_taiwan_adult_thresholds(self):
         for bmi, category in [
@@ -40,7 +49,7 @@ class BmiAppTests(unittest.TestCase):
                 page = response.get_data(as_text=True)
                 self.assertEqual(response.status_code, 200)
                 self.assertIn('aria-invalid="true"', page)
-                self.assertNotIn("YOUR RESULT", page)
+                self.assertIn('id="result-panel" aria-labelledby="result-title" aria-live="polite" hidden', page)
 
     def test_input_is_escaped(self):
         response = self.client.post("/", data={"height": '<script>alert(1)</script>', "weight": "65"})
