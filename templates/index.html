@@ -35,6 +35,12 @@
 
               <form method="post" action="{{ url_for('index') }}" novalidate data-guidance='{{ guidance_data|tojson }}'>
                 <div class="form-fields">
+                  <div class="field name-field">
+                    <label for="name">姓名 <span>NAME · 選填</span></label>
+                    <div class="input-wrap">
+                      <input id="name" name="name" type="text" autocomplete="name" placeholder="例如 小明" value="{{ name_input }}">
+                    </div>
+                  </div>
                   <div class="field">
                     <label for="height">身高 <span>HEIGHT</span></label>
                     <div class="input-wrap">
@@ -82,7 +88,7 @@
               <div class="result-divider"></div>
               <span class="result-label">你的體位屬於 <strong id="result-label">{{ result.label if result else "—" }}</strong></span>
               <h2 id="result-title">給你的健康建議</h2>
-              <p id="result-advice">{{ result.advice if result else "" }}</p>
+              <p id="result-advice">{% if result %}{% if name_input %}{{ name_input }}，{% endif %}{{ result.advice }}{% endif %}</p>
               <span class="result-decoration" aria-hidden="true">✳</span>
             </section>
             <div class="illustration" id="illustration" aria-hidden="true" {% if result %}hidden{% endif %}>

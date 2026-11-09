@@ -23,6 +23,30 @@ class BmiAppTests(unittest.TestCase):
         self.assertIn('style="--needle-angle: -15.0deg"', page)
         self.assertIn('class="gauge-needle"', page)
 
+    def test_name_is_optional_and_personalizes_advice(self):
+        response = self.client.post("/", data={"name": "  小明  ", "height": "170", "weight": "65"})
+        page = response.get_data(as_text=True)
+        self.assertIn('name="name" type="text"', page)
+        self.assertIn('value="小明"', page)
+        self.assertIn('<p id="result-advice">小明，維持均衡飲食', page)
+
+        for name in ("", "   "):
+            with self.subTest(name=name):
+                response = self.client.post("/", data={"name": name, "height": "170", "weight": "65"})
+                self.assertIn('<p id="result-advice">維持均衡飲食', response.get_data(as_text=True))
+
+    def test_name_is_preserved_when_other_fields_are_invalid(self):
+        response = self.client.post("/", data={"name": "小明", "height": "", "weight": "65"})
+        page = response.get_data(as_text=True)
+        self.assertIn('value="小明"', page)
+        self.assertIn('id="height-error"', page)
+
+    def test_name_is_escaped_in_input_and_advice(self):
+        response = self.client.post("/", data={"name": '<script>alert("x")</script>', "height": "170", "weight": "65"})
+        page = response.get_data(as_text=True)
+        self.assertNotIn('<script>alert("x")</script>', page)
+        self.assertIn('&lt;script&gt;alert(&#34;x&#34;)&lt;/script&gt;，維持均衡飲食', page)
+
     def test_gauge_angle_is_clamped_to_display_range(self):
         self.assertEqual(bmi_gauge_angle(10), -90)
         self.assertEqual(bmi_gauge_angle(25), 0)
