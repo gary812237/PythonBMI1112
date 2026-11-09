@@ -2,6 +2,7 @@
   const form = document.querySelector(".calculator form");
   if (!form) return;
 
+  const nameInput = form.querySelector("#name");
   const heightInput = form.querySelector("#height");
   const weightInput = form.querySelector("#weight");
   const panel = document.querySelector("#result-panel");
@@ -55,7 +56,8 @@
 
     bmiNumber.textContent = roundedBmi.toFixed(1);
     categoryLabel.textContent = result.label;
-    advice.textContent = result.advice;
+    const name = nameInput.value.trim();
+    advice.textContent = name ? `${name}，${result.advice}` : result.advice;
     panel.classList.remove("low", "healthy", "high", "obese");
     panel.classList.add(result.tone);
     needle.style.setProperty("--needle-angle", `${angle.toFixed(1)}deg`);
